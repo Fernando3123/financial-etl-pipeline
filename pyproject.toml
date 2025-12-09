@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "financial_monitoring_engine"
+version = "0.1.0"
+description = "Risk engine and financial monitoring"
+authors = [{name = "Fernando", email = "pickfer3@gmail.com"}]
+dependencies = [
+    "pandas",
+    "yfinance",
+    "numpy"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
