@@ -1,36 +1,59 @@
-# 📈 Financial Data ETL Pipeline
+# Financial Risk Monitoring Engine
 
-**Status:** 🚧 Phase 1 — Initial MVP
+A modular quantitative pipeline for ingesting market data, computing core risk metrics, and storing normalized time-series into a SQL repository for analytics and BI consumption.
 
-## 📋 Overview
-This project is the foundation of a Portfolio Monitoring System.  
-The first version implements a simple **ETL pipeline** to process trade data using Python and Pandas, replacing manual Excel workflows.
+This project models the architecture found in real-world financial data engineering pipelines — **ingest → transform → compute → persist** — following professional software design principles.
 
-## 🛠️ Tech Stack
-- **Language:** Python 3.12+
-- **Libraries:** Pandas, OpenPyXL
-- **Data Source:** Excel (.xlsx)
+## 🎯 Project Overview
+This repository implements a small-scale Risk Engine capable of:
+- Fetching historical adjusted prices from market data providers
+- Computing essential risk indicators
+- Aligning time-series to ensure mathematical consistency
+- Persisting normalized data into a relational database
 
-## 🚀 How It Works (Phase 1)
-The script performs the following steps:
+It is designed as a portfolio-grade project demonstrating skills required in quantitative finance, data engineering, and Python-based financial analytics.
 
-1. **Extract**  
-   Loads raw trade data from an Excel file into a DataFrame.
+## 📦 Scope & Features
+- **Automated Data Ingestion:** Historical price retrieval using Yahoo Finance.
+- **Normalization Pipeline:**
+  - Wide → Long formatting
+  - Strict index alignment (implicit inner-join via time-based filtering)
+- **Risk Metric Computation:**
+  - Daily returns
+  - 21-day annualized volatility
+  - Cumulative return (optional future step)
+- **Persistence Layer:**
+  - SQLite repository pattern
+  - Append/replace modes
+  - Structured schema for multi-asset storage
+- **BI-Ready Output:**
+  - SQL table optimized for Power BI or Python analytics
 
-2. **Transform**  
-   Uses vectorized operations to compute traded volume (`Qtd * Preco`) and aggregate total results.
+## 🛠 Tech Stack
+- **Python 3.14+**
+- **Pandas, NumPy**
+- **YFinance** (API wrapper)
+- **SQLite3** (native database engine)
+- **pyproject.toml** (PEP-621 compliant)
+- **Power BI / Jupyter** (consumption layer)
 
-3. **Load**  
-   Exports the processed dataset to a new Excel file optimized for Power BI.
+## 🧠 Demonstrated Competencies
+- Handling financial time-series with market conventions (e.g., .SA tickers)
+- **ETL design with clear separation of concerns:**
+  - Data Providers
+  - Processors (risk logic)
+  - Repository layer (SQL)
+- OOP architecture for pipelines
+- Time-series validation and alignment
+- SQL relational modeling for analytics workloads
 
-## 🔮 Roadmap (Next Steps)
-This repository documents my progression in Data & Financial Engineering. Future additions include:
-
-- [ ] Migration to SQL Database (SQLite/PostgreSQL)  
-- [ ] Add financial risk metrics (Volatility, VaR, Beta)  
-- [ ] Integration with Power BI dashboards  
-- [ ] Automate data retrieval from B3 / Yahoo Finance APIs  
-
----
-
-*Created by Fernando — CEA Certified*
+## 📁 Repository Structure
+```text
+financial-monitoring-engine/
+├── data/                   # SQLite database storage
+├── src/
+│   ├── data_providers/     # Market data ingestion & SQL repository
+│   ├── processors/         # Risk & statistical calculations
+├── tests/                  # (future) unit tests
+├── main.py                 # Pipeline orchestrator
+└── pyproject.toml          # Build metadata
