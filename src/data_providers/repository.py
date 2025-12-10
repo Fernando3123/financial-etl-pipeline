@@ -24,13 +24,16 @@ class RiskDatabase:
         cursor = conn.cursor()
         
         # Defining 'market_data' schema
+        # UPDATED: Added sharpe_ratio and beta_21d columns
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS market_data (
                 date DATE,
                 ticker TEXT,
                 close REAL,
                 daily_return REAL,
-                volatility_21d REAL
+                volatility_21d REAL,
+                sharpe_ratio REAL,
+                beta_21d REAL
             )
         """)
         conn.commit()
@@ -42,8 +45,7 @@ class RiskDatabase:
         """
         conn = sqlite3.connect(self.db_path)
         try:
-            # Using 'append' mode to preserve historical data
-            data.to_sql("market_data", conn, if_exists="append", index=False)
+            data.to_sql("market_data", conn, if_exists="replace", index=False)
             print(f"[SUCCESS] Data successfully saved to: {self.db_path}")
         except Exception as e:
             print(f"[ERROR] Failed to save to database: {e}")

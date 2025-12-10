@@ -8,14 +8,15 @@ def run_pipeline():
     """
     Orchestrates the Financial Risk Engine pipeline:
     1. Ingestion (Yahoo Finance)
-    2. Processing (Risk Metrics Calculation)
+    2. Processing (Risk Metrics: Volatility, Sharpe, Beta)
     3. Persistence (SQLite Database)
     """
     print("[INFO] Initializing Financial Risk Engine...")
     
     # 1. Configuration & Setup
-    # Tickers list (Brazilian assets will be handled by the provider)
+    # BOVA11 is required as the benchmark for Beta calculation
     tickers = ["PETR4", "VALE3", "ITUB4", "BOVA11", "WEGE3", "AAPL34"]
+    benchmark_ticker = "BOVA11" 
     
     # 2. Ingestion Layer
     print(f"[INFO] Fetching historical data for {len(tickers)} assets...")
@@ -23,30 +24,42 @@ def run_pipeline():
     raw_prices = market_data.get_history(period="2y")
     
     # 3. Processing Layer
-    print("[INFO] Processing risk metrics (Returns & Volatility)...")
+    print("[INFO] Processing risk metrics (Returns, Volatility, Sharpe, Beta)...")
     calculator = FinancialCalculator()
     repository = RiskDatabase()
     
+    # PRE-CALCULATION: Prepare Benchmark Data (BOVA11)
+    benchmark_sa = f"{benchmark_ticker}.SA"
+    if benchmark_sa not in raw_prices.columns:
+        print(f"[CRITICAL ERROR] Benchmark {benchmark_sa} not found. Cannot calculate Beta.")
+        return
+
+    s_benchmark_prices = raw_prices[benchmark_sa]
+    s_benchmark_returns = calculator.calculate_returns(s_benchmark_prices)
+
     processed_frames = []
 
     for ticker in tickers:
         ticker_sa = f"{ticker}.SA"
         
-        # Validate data availability for the ticker
         if ticker_sa in raw_prices.columns:
             # Extract Series
             s_price = raw_prices[ticker_sa]
             
-            # Compute Metrics
+            # --- CORE METRICS ---
             s_return = calculator.calculate_returns(s_price)
             s_vol = calculator.calculate_volatility(s_return)
             
-            # Data Alignment (Inner Join)
-            # Ensures data integrity by dropping rows with missing metrics (e.g., NaN volatility)
-            df_ticker = pd.concat([s_price, s_return, s_vol], axis=1, join='inner')
+            # --- ADVANCED METRICS ---
+            s_sharpe = calculator.calculate_sharpe_ratio(s_return, s_vol)
+            s_beta = calculator.calculate_rolling_beta(s_return, s_benchmark_returns)
+            
+            # --- SUPREME FUSION (Data Alignment) ---
+            # Inner join ensures all metrics are available for the row
+            df_ticker = pd.concat([s_price, s_return, s_vol, s_sharpe, s_beta], axis=1, join='inner')
             
             # Standardization for Database Schema
-            df_ticker.columns = ['close', 'daily_return', 'volatility_21d']
+            df_ticker.columns = ['close', 'daily_return', 'volatility_21d', 'sharpe_ratio', 'beta_21d']
             
             # Metadata injection
             df_ticker['ticker'] = ticker
@@ -58,10 +71,7 @@ def run_pipeline():
 
     # 4. Persistence Layer
     if processed_frames:
-        # Consolidate all assets into a single normalized table
         final_df = pd.concat(processed_frames)
-        
-        # Type enforcement for SQL compatibility
         final_df['date'] = pd.to_datetime(final_df['date']).dt.date
         
         print("[INFO] Data processing complete. Sample output:")
