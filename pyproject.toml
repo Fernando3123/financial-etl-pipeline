@@ -10,7 +10,8 @@ authors = [{name = "Fernando", email = "pickfer3@gmail.com"}]
 dependencies = [
     "pandas",
     "yfinance",
-    "numpy"
+    "numpy",
+    "PyYAML" 
 ]
 
 [tool.setuptools.packages.find]

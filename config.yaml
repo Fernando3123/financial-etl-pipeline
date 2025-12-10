@@ -1,0 +1,18 @@
+# Configuração do Financial Risk Engine
+# Edite aqui para alterar os parâmetros da execução
+
+pipeline:
+  period: 2y        # Período de histórico (1y, 2y, 5y, max)
+  risk_free_rate: 0.10 # Taxa Livre de Risco para Sharpe (10% a.a.)
+
+assets:
+  benchmark: BOVA11 # O índice de mercado para cálculo do Beta
+  tickers:          # Lista de ativos para analisar
+    - PETR4
+    - VALE3
+    - ITUB4
+    - WEGE3
+    - BBAS3
+    - MGLU3
+    - INBR32
+    # Adicione novos ativos abaixo...
